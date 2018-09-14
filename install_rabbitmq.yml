@@ -7,7 +7,7 @@
     - name: Copy rabbit service template to dst server
       template:
 ####### Change path to tmpl
-        src: /home/user/ansible/tasks/templates/rabbit.tmpl
+        src: templates/rabbit.tmpl
         dest: /lib/systemd/system/docker.{{ item.systemd_service_name }}.service
         owner: root
         group: root
