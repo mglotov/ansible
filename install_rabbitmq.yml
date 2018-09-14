@@ -13,7 +13,7 @@
         group: root
       register: rabbitconf
       with_items:
-        - { rabbit_image_tag: 3-management-alpine, rabbit_container_name: rabbitmq, rabbit_port_5672: 5672, rabbit_port_15672: 15672, rabbit_volume_name: rabbitmq, rabbit_default_user: admin, rabbit_default_pass: admin, systemd_service_name: rabbitmq}
+        - { rabbit_image_tag: 3-management-alpine, rabbit_container_name: rabbitmq, rabbit_port_5672: 5672, rabbit_port_15672: 15672, rabbit_volume_name: rabbitmq, rabbit_default_user: admin, rabbit_default_pass: admin, systemd_service_name: rabbitmq }
 ### Reload systemd conf
     - name: Reload systemd-daemon
       systemd:
