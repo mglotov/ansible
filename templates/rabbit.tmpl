@@ -1,1 +1,26 @@
 
+[Unit]
+Description=rabbitmq container
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker stop {{ item.rabbit_container_name }}
+ExecStartPre=-/usr/bin/docker rm {{ item.rabbit_container_name }}
+ExecStartPre=/usr/bin/docker pull rabbitmq:{{ item.rabbit_image_tag }}
+
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name {{ item.rabbit_container_name }} \
+    --hostname rabbitmq \
+    --publish={{ item.rabbit_port_5672 }}:5672 \
+    --publish={{ item.rabbit_port_15672 }}:15672 \
+    --volume={{ item.rabbit_volume_name }}:/var/lib/rabbitmq \
+    --env RABBITMQ_DEFAULT_USER={{ item.rabbit_default_user }} \
+    --env RABBITMQ_DEFAULT_PASS={{ item.rabbit_default_pass }} \
+    rabbitmq:{{ item.rabbit_image_tag }}
+
+[Install]
+WantedBy=multi-user.target
