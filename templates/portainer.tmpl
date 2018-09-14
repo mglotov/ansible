@@ -1,0 +1,22 @@
+[Unit]
+Description=Portainer container
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker stop {{ portainer_container_name }}
+ExecStartPre=-/usr/bin/docker rm {{ portainer_container_name }}
+ExecStartPre=/usr/bin/docker pull portainer/portainer:{{ portainer_image_tag }}
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name {{ portainer_container_name }} \
+    --memory {{ portainer_memory }} \
+    --publish {{ portainer_port }}:9000 \
+    --volume {{ portainer_volume }}:/data \
+    --volume /var/run/docker.sock:/var/run/docker.sock \
+    portainer/portainer:{{ portainer_image_tag }}
+
+[Install]
+WantedBy=multi-user.target
