@@ -1,0 +1,44 @@
+---
+- hosts: all
+  remote_user: "{{ user_login }}"
+  become: true
+  become_method: sudo
+  tasks:
+### Install docker on Ubuntu
+    - name: Update repositories cache and install needed packages 
+      apt:
+        name: "{{ item }}"
+        update_cache: yes
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+    - name: Add an Apt signing key for docker-ce
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    - name: Add docker repository
+      apt_repository: repo='deb [arch=amd64] https://download.docker.com/linux/ubuntu "{{ansible_distribution_release}}" stable' state=present
+    - name: Update apt cache and install docker-ce on Ubuntu
+      apt:
+        name: docker-ce
+        update_cache: yes
+## Install Docker on LinuxAmi
+    - name: Install the latest version of Docker on LinuxAmi
+      yum:
+        name: docker
+        state: latest
+      when: ansible_distribution == "Amazon"
+### Start docker service and enable autoboot
+    - name: Start docker service and enable autoboot
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+### Add user into docker group
+    - name: Add user into docker group
+      user:
+        name: "{{ user_login }}"
+        group: docker
+        append: yes
