@@ -1,0 +1,36 @@
+---
+- hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+### Add rabbit service file
+    - name: Copy rabbit service template to dst server
+      template:
+####### Change path to tmpl
+        src: /home/user/ansible/tasks/templates/rabbit.tmpl
+        dest: /lib/systemd/system/docker.{{ item.systemd_service_name }}.service
+        owner: root
+        group: root
+      register: rabbitconf
+      with_items:
+        - { rabbit_image_tag: 3-management-alpine, rabbit_container_name: rabbitmq, rabbit_port_5672: 5672, rabbit_port_15672: 15672, rabbit_volume_name: rabbitmq, rabbit_default_user: admin, rabbit_default_pass: admin, systemd_service_name: rabbitmq}
+### Reload systemd conf
+    - name: Reload systemd-daemon
+      systemd:
+        daemon_reload: yes
+      when: item.changed == true
+      with_items: "{{ rabbitconf.results }}"
+### Restart systemd rabbit service if changed
+    - name: Restart rabbitmq service and enable autoboot
+      systemd:
+        name: docker.{{ item.item.systemd_service_name }}.service
+        state: restarted
+      when: item.changed == true
+      with_items: "{{ rabbitconf.results }}"
+### Start docker service and enable autoboot
+    - name: Start rabbitmq service and enable autoboot
+      systemd:
+        name: docker.{{ item.item.systemd_service_name }}.service
+        state: started
+        enabled: yes
+      with_items: "{{ rabbitconf.results }}"
