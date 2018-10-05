@@ -1,0 +1,37 @@
+debug = false
+
+logLevel = "ERROR"
+
+{% if traefik_ssl == 'true' %}
+defaultEntryPoints = ["https","http"]
+{% else %}
+defaultEntryPoints = ["http"]
+{% endif %}
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+{% if traefik_ssl == 'true' %}
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+  [entryPoints.https.tls]
+{% endif %}
+
+[retry]
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+watch = true
+exposedbydefault = false
+
+{% if traefik_ssl == 'true' %}
+[acme]
+email = "{{ certificate_email }}"
+storage = "acme.json"
+entryPoint = "https"
+OnHostRule = true
+[acme.httpChallenge]
+entryPoint = "http"
+{% endif %}

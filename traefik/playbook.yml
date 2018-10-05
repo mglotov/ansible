@@ -1,0 +1,14 @@
+## If you have backend not only docker, add information about this to templates/traefik.tmpl by example files/traefik.tmpl2 (section file)
+---
+- name: Install traefik
+  hosts: all
+  become: yes
+  gather_facts: false
+
+  vars:
+    certificate_email: your@email.com
+    traefik_expose_api: "true"
+    traefik_api_port: 9080
+    traefik_ssl: "true"
+  roles:
+    - traefik

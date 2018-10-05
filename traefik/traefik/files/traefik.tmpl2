@@ -1,0 +1,40 @@
+debug = false
+
+logLevel = "ERROR"
+defaultEntryPoints = ["https","http"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+  [entryPoints.https.tls]
+
+[retry]
+
+[acme]
+email = "your@email.com"
+storage = "acme.json"
+entryPoint = "https"
+OnHostRule = true
+[acme.httpChallenge]
+entryPoint = "http"
+
+[file]
+
+# Backends aka upstreams
+[backends]
+  [backends.proxy-backend]
+    [backends.proxy-backend.servers]
+      [backends.proxy-backend.servers.server0]
+        url = "http://upsteam_ip:upsteam_port"
+
+# Frontends aka virtual-hosts
+[frontends]
+  [frontends.proxy-frontend]
+      backend = "proxy-backend"
+      passHostHeader = true
+      [frontends.proxy-frontend.routes.example]
+          rule = "Host:myhostname.example.com"

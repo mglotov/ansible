@@ -1,0 +1,34 @@
+---
+- name: create docker.traefik.service
+  template:
+    src: templates/docker.traefik.service
+    dest: /lib/systemd/system/docker.traefik.service
+    owner: root
+    group: root
+
+- name: Create traefik common-files dir
+  file:
+    path: /opt/traefik
+    state: directory
+    mode: 0755
+
+- name: Copy traefik config to server
+  template:
+    src: templates/traefik.tmpl
+    dest: /opt/traefik/traefik.toml
+    owner: root
+    group: root
+
+- name: create acme.json
+  file:
+    path: /opt/traefik/acme.json
+    state: touch
+    mode: 0600
+
+- name: enable docker.traefik.service
+  systemd:
+    name: docker.traefik
+    daemon_reload: yes
+    enabled: yes
+    masked: no
+    state: restarted

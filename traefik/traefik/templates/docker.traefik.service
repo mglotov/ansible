@@ -1,0 +1,26 @@
+[Unit]
+Description=traefik Container
+After=docker.service
+Requires=docker.service
+ 
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker stop %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull traefik
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name %n \
+    --publish 80:80 \
+    --publish 443:443 \
+{% if traefik_expose_api == 'true' %}
+    --publish {{ traefik_api_port }}:8080 \
+{% endif %}
+    --volume /var/run/docker.sock:/var/run/docker.sock \
+    --volume /opt/traefik/traefik.toml:/traefik.toml \
+    --volume /opt/traefik/acme.json:/acme.json \
+    traefik --api --docker
+
+[Install]
+WantedBy=multi-user.target
