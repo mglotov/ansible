@@ -1,4 +1,3 @@
-## If you have backend not only docker, add information about this to templates/traefik.tmpl by example files/traefik.tmpl2 (section file)
 ---
 - name: Install traefik
   hosts: all
