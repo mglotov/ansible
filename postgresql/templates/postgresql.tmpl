@@ -1,0 +1,23 @@
+
+[Unit]
+Description=postgresql container
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker stop {{ item.postgresql_container_name }}
+ExecStartPre=-/usr/bin/docker rm {{ item.postgresql_container_name }}
+ExecStartPre=/usr/bin/docker pull postgres:{{ item.postgresql_image_tag }}
+
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name {{ item.postgresql_container_name }} \
+    --publish={{ item.postgresql_port_5432 }}:5432 \
+    --env POSTGRES_PASSWORD={{ item.postgresql_password }} \
+    --volume={{ item.postgresql_volume_name }}:/var/lib/postgresql/data \
+    postgres:{{ item.postgresql_image_tag }}
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,36 @@
+---
+- hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+### Add postgresql service file
+    - name: Copy postgresql service template to dst server
+      template:
+####### Change path to tmpl
+        src: templates/postgresql.tmpl
+        dest: /lib/systemd/system/docker.{{ item.systemd_service_name }}.service
+        owner: root
+        group: root
+      register: postgresqlconf
+      with_items:
+        - { postgresql_image_tag: 9.6-alpine, postgresql_container_name: postgres, postgresql_port_5432: 5432, postgresql_password: 21rRRp5fzZXKO8U, postgresql_volume_name: postgres_data, systemd_service_name: postgres }
+### Reload systemd conf
+    - name: Reload systemd-daemon
+      systemd:
+        daemon_reload: yes
+      when: item.changed == true
+      with_items: "{{ postgresqlconf.results }}"
+### Restart systemd postgresql service if changed
+    - name: Restart postgresql service and enable autoboot
+      systemd:
+        name: docker.{{ item.item.systemd_service_name }}.service
+        state: restarted
+      when: item.changed == true
+      with_items: "{{ postgresqlconf.results }}"
+### Start docker service and enable autoboot
+    - name: Start postgresql service and enable autoboot
+      systemd:
+        name: docker.{{ item.item.systemd_service_name }}.service
+        state: started
+        enabled: yes
+      with_items: "{{ postgresqlconf.results }}"

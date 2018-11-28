@@ -1,0 +1,36 @@
+---
+- hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+### Add redis service file
+    - name: Copy redis service template to dst server
+      template:
+####### Change path to tmpl
+        src: templates/redis.tmpl
+        dest: /lib/systemd/system/docker.{{ item.systemd_service_name }}.service
+        owner: root
+        group: root
+      register: redisconf
+      with_items:
+        - { redis_image_tag: 4-alpine, redis_container_name: redis, redis_port_6379: 6379, redis_volume_name: redis, systemd_service_name: redis }
+### Reload systemd conf
+    - name: Reload systemd-daemon
+      systemd:
+        daemon_reload: yes
+      when: item.changed == true
+      with_items: "{{ redisconf.results }}"
+### Restart systemd redis service if changed
+    - name: Restart redis service and enable autoboot
+      systemd:
+        name: docker.{{ item.item.systemd_service_name }}.service
+        state: restarted
+      when: item.changed == true
+      with_items: "{{ redisconf.results }}"
+### Start docker service and enable autoboot
+    - name: Start redis service and enable autoboot
+      systemd:
+        name: docker.{{ item.item.systemd_service_name }}.service
+        state: started
+        enabled: yes
+      with_items: "{{ redisconf.results }}"
