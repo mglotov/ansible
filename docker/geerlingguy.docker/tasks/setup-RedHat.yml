@@ -17,7 +17,7 @@
   when: ansible_distribution == "Amazon"
 - name: Install container-selinux
   yum:
-    name: http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.42-1.gitad8f0f7.el7.noarch.rpm
+    name: http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.68-1.el7.noarch.rpm
     state: present
   when: ansible_distribution == "Amazon"
 ###
